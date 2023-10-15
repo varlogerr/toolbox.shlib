@@ -14,3 +14,7 @@
   [*.{md,mdx}]
   trim_trailing_whitespace = false
 # {/SHLIB_GEN}
+
+[tests/fixture/**]
+trim_trailing_whitespace = false
+insert_final_newline = false
