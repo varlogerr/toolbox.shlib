@@ -2,6 +2,13 @@
 
 # shellcheck disable=SC2120
 
+import_nl_meta_comment() { echo "
+  Import SHLIB_NL variable, robust new line
+  REFERENCES:
+ ,  * https://stackoverflow.com/a/64938613
+"; }
+import_nl() { SHLIB_NL="$(printf '\nX')"; SHLIB_NL="${SHLIB_NL%X}"; }
+
 # https://stackoverflow.com/a/2705678
 escape_sed_expr() { cat -- "${@}" | sed 's/[]\/$*.^[]/\\&/'; }
 escape_sed_repl() { cat -- "${@}" | sed 's/[\/&]/\\&/'; }
@@ -83,6 +90,9 @@ log_fuck() { log_sth FUCK "${@}"; }
 # {{ END_LIB /}}
 (return 0 &>/dev/null) && return
 
+# Import SHLIB_NL
+import_nl
+
 declare TARGET="${1}"
 
 _cache() {
@@ -98,7 +108,7 @@ _cache() {
 
   [[ -n "${__CACHE[$key]+x}" ]] || return 1
 
-  printf -- '%s' "${__CACHE[${key}]}${__CACHE[${key}]:+$'\n'}"
+  printf -- '%s' "${__CACHE[${key}]}${__CACHE[${key}]:+${SHLIB_NL}}"
   return 0
 }
 
@@ -157,7 +167,7 @@ lib_func_deps() (
       eval -- "printf -- '%s\\n' \"\${${fname}_meta_deps[@]}\"" \
       | grep -vFxf <(cat <<< "${deps}") | grep '.')" || continue
 
-    deps+=$'\n'"${new_deps}"
+    deps+="${SHLIB_NL}${new_deps}"
   done
 )
 
@@ -232,11 +242,11 @@ declare UPDATE; UPDATE="$(
   done <<< "${REQUESTED_DEPS}"
 )"
 
-UPDATE="$(text_to_prefixed '# @' <<< "${REQUESTED}")${REQUESTED:+$'\n\n'}${UPDATE}"
+UPDATE="$(text_to_prefixed '# @' <<< "${REQUESTED}")${REQUESTED:+${SHLIB_NL}${SHLIB_NL}}${UPDATE}"
 TARGET_TEXT="$(cat -- "${TARGET}")"
 
 {
   head -n "${TARGET_LINES[0]}" <<< "${TARGET_TEXT}"
-  printf -- '%s' "${UPDATE}${UPDATE:+$'\n'}"
+  printf -- '%s' "${UPDATE}${UPDATE:+${SHLIB_NL}}"
   tail -n +"${TARGET_LINES[1]}" <<< "${TARGET_TEXT}"
 } | tee -- "${TARGET}" >/dev/null
