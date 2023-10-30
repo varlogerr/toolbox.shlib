@@ -4,6 +4,13 @@
 
 import_nl_meta_comment() { echo "
   Import SHLIB_NL variable, robust new line
+ ,
+  USAGE:
+ ,  # Import SHLIB_NL
+ ,  {{ CMD }}
+ ,
+ ,  # Trap SHLIB_NL in the my_func scope
+ ,  my_func() { declare SHLIB_NL; {{ CMD }}; }}
   REFERENCES:
  ,  * https://stackoverflow.com/a/64938613
 "; }
